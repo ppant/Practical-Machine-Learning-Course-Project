@@ -46,6 +46,4 @@ if(!file.exists("test_data.csv")){
 # Read the .CSV file in R data structure 
 trainData <- read.csv("train_data.csv")
 testData <- read.csv("test_data.csv")
-# Remove the NA values and store in a separate structure for future use
-#activityDataCleaned <- activityData[complete.cases(activityData),]
 ```

@@ -1,0 +1,51 @@
+---
+title: "Course Project Prediction assignment"
+author: "Pradeep K. Pant, ppant@cpan.org"
+date: "July 26, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+# Loading and preprocessing the data
+# Load CRAN modules 
+library(downloader)
+library(plyr)
+library(knitr)
+library(datasets)
+library(ggplot2)
+library(rmarkdown)
+
+# Step 1
+# Download the training data set if not avaliable in default location
+train_Url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+# Download the test data set if not avaliable in default location
+test_Url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+# Train data
+# Check if zip has already been downloaded in projectData directory?
+if(!file.exists("train_data.zip")){
+  download.file(train_Url,destfile="train_data.csv",mode = "wb")
+  }
+# Check if zip has already been unzipped?
+if(!file.exists("train_data.csv")){
+  unzip(zipfile="train_data.zip")
+}
+# Test data
+# Check if zip has already been downloaded in projectData directory?
+if(!file.exists("test_data.zip")){
+  download.file(test_Url,destfile="test_data.csv",mode = "wb")
+  }
+# Check if zip has already been unzipped?
+if(!file.exists("test_data.csv")){
+  unzip(zipfile="test_data.zip")
+}
+
+# Read the .CSV file in R data structure 
+trainData <- read.csv("train_data.csv")
+testData <- read.csv("test_data.csv")
+# Remove the NA values and store in a separate structure for future use
+#activityDataCleaned <- activityData[complete.cases(activityData),]
+```

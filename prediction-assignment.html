@@ -11,7 +11,7 @@
 
 <meta name="author" content="Pradeep K. Pant, ppant@cpan.org" />
 
-<meta name="date" content="2016-07-26" />
+<meta name="date" content="2016-07-30" />
 
 <title>Course Project Prediction assignment</title>
 
@@ -118,11 +118,18 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Course Project Prediction assignment</h1>
 <h4 class="author"><em>Pradeep K. Pant, <a href="mailto:ppant@cpan.org">ppant@cpan.org</a></em></h4>
-<h4 class="date"><em>July 26, 2016</em></h4>
+<h4 class="date"><em>July 30, 2016</em></h4>
 
 </div>
 
 
+<div id="introduction" class="section level2">
+<h2>1. Introduction</h2>
+<p>For this project, we are given data from accelerometers on the belt, forearm, arm, and dumbell of 6 research study participants. Our training data consists of accelerometer data and a label identifying the quality of the activity the participant was doing. Our testing data consists of accelerometer data without the identifying label. Our goal is to predict the labels for the test set observations.</p>
+<p>Later part of the project I have shown the way I have built the model, coded for cross validation, estimating the out-of-sample error and making predictions.</p>
+</div>
+<div id="prepating-data" class="section level2">
+<h2>2. Prepating data</h2>
 <pre class="r"><code># Loading and preprocessing the data
 # Load CRAN modules 
 library(downloader)
@@ -131,8 +138,9 @@ library(knitr)
 library(datasets)
 library(ggplot2)
 library(rmarkdown)
-
-# Step 1
+library(caret)</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre class="r"><code># Step 1
 # Download the training data set if not avaliable in default location
 train_Url &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
 # Download the test data set if not avaliable in default location
@@ -140,28 +148,154 @@ test_Url &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-tes
 
 # Train data
 # Check if zip has already been downloaded in projectData directory?
-if(!file.exists(&quot;train_data.zip&quot;)){
+if(!file.exists(&quot;train_data.csv&quot;)){
   download.file(train_Url,destfile=&quot;train_data.csv&quot;,mode = &quot;wb&quot;)
   }
-# Check if zip has already been unzipped?
-if(!file.exists(&quot;train_data.csv&quot;)){
-  unzip(zipfile=&quot;train_data.zip&quot;)
-}
 # Test data
 # Check if zip has already been downloaded in projectData directory?
-if(!file.exists(&quot;test_data.zip&quot;)){
+if(!file.exists(&quot;test_data.csv&quot;)){
   download.file(test_Url,destfile=&quot;test_data.csv&quot;,mode = &quot;wb&quot;)
   }
-# Check if zip has already been unzipped?
-if(!file.exists(&quot;test_data.csv&quot;)){
-  unzip(zipfile=&quot;test_data.zip&quot;)
-}
-
 # Read the .CSV file in R data structure 
 trainData &lt;- read.csv(&quot;train_data.csv&quot;)
 testData &lt;- read.csv(&quot;test_data.csv&quot;)
-# Remove the NA values and store in a separate structure for future use
-#activityDataCleaned &lt;- activityData[complete.cases(activityData),]</code></pre>
+# Split the data in traning and validation point based on classe variable
+set.seed(123)
+inTrain &lt;- createDataPartition(y=trainData$classe, p=0.7, list=F)
+trainData1 &lt;- trainData[inTrain, ]
+trainData2 &lt;- trainData[-inTrain, ]</code></pre>
+<p>In the next step we will be reducing number of features by removing variables with nearly zero variance, variables that are almost always NA, and variables that don’t add much value in making prediction. We’ll then analyse trainData1 and trainData2 and then will decide which ones to remove.</p>
+<pre class="r"><code># Lets remove variables with nearly zero variance
+nzv &lt;- nearZeroVar(trainData1)
+trainData1 &lt;- trainData1[, -nzv]
+trainData2 &lt;- trainData2[, -nzv]
+
+# remove variables that are almost always NA
+mostlyNA &lt;- sapply(trainData1, function(x) mean(is.na(x))) &gt; 0.95
+trainData1 &lt;- trainData1[, mostlyNA==F]
+trainData2 &lt;- trainData2[, mostlyNA==F]
+
+# remove variables that don't add much value addition to the prediction, which are the first five variables
+trainData1 &lt;- trainData1[, -(1:5)]
+trainData2 &lt;- trainData2[, -(1:5)]</code></pre>
+</div>
+<div id="building-a-model" class="section level2">
+<h2>3. Building a model</h2>
+<p>I have used Random Forest model, to see if it would have acceptable performance. First, fit the model on trainData1, and instruct the “train” function to use 3-fold cross-validation to select optimal tuning parameters for the model.</p>
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
+<pre class="r"><code># train using 3-fold Cross validation to select optimal tuning parameters
+fitControl &lt;- trainControl(method=&quot;cv&quot;, number=3, verboseIter=F)
+
+# fit model on trainData1 using Random forest model
+fit &lt;- train(classe ~ ., data=trainData1, method=&quot;rf&quot;, trControl=fitControl)
+# print the final model and see which parameters has been used 
+fit$finalModel</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(x = x, y = y, mtry = param$mtry) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 27
+## 
+##         OOB estimate of  error rate: 0.19%
+## Confusion matrix:
+##      A    B    C    D    E  class.error
+## A 3904    1    0    0    1 0.0005120328
+## B    7 2649    2    0    0 0.0033860045
+## C    0    3 2393    0    0 0.0012520868
+## D    0    0    8 2243    1 0.0039964476
+## E    0    0    0    3 2522 0.0011881188</code></pre>
+</div>
+<div id="evaluating-model-and-predict-label" class="section level2">
+<h2>4. Evaluating model and predict label</h2>
+<p>Now, I use the fitted model to predict the label (“classe”) in trainData2, and show the confusion matrix to compare the predicted versus the actual labels:</p>
+<pre class="r"><code># Now, use model to predict classe in validation set (trainData2)
+preds &lt;- predict(fit, newdata=trainData2)
+
+# show confusion matrix to get estimate of out-of-sample error
+confusionMatrix(trainData2$classe, preds)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1674    0    0    0    0
+##          B    3 1136    0    0    0
+##          C    0    4 1022    0    0
+##          D    0    0    4  959    1
+##          E    0    0    0    0 1082
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.998           
+##                  95% CI : (0.9964, 0.9989)
+##     No Information Rate : 0.285           
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9974          
+##  Mcnemar's Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9982   0.9965   0.9961   1.0000   0.9991
+## Specificity            1.0000   0.9994   0.9992   0.9990   1.0000
+## Pos Pred Value         1.0000   0.9974   0.9961   0.9948   1.0000
+## Neg Pred Value         0.9993   0.9992   0.9992   1.0000   0.9998
+## Prevalence             0.2850   0.1937   0.1743   0.1630   0.1840
+## Detection Rate         0.2845   0.1930   0.1737   0.1630   0.1839
+## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
+## Balanced Accuracy      0.9991   0.9979   0.9976   0.9995   0.9995</code></pre>
+<p>The accuracy is 99.82% and predicted accuracy for the out-of-sample error is 0.28%. So Random Forests alogorithm looks good to predict on the test set.</p>
+</div>
+<div id="re-training-the-model-on-main-training-and-test-data" class="section level2">
+<h2>5. Re-training the Model on main training and test data</h2>
+<p>One important point before predicting on the test set, that we the train the model on the full training set (trainData), rather than using a model trained on a reduced training set (trainData1), in order to produce the most accurate predictions. So we’ll repeat the same on original train and test set (trainData and testData respectively):</p>
+<pre class="r"><code># remove variables with nearly zero variance
+nzv &lt;- nearZeroVar(trainData)
+trainData &lt;- trainData[, -nzv]
+testData &lt;- testData[, -nzv]
+
+# remove variables that are almost always NA
+mostlyNA &lt;- sapply(trainData, function(x) mean(is.na(x))) &gt; 0.95
+trainData &lt;- trainData[, mostlyNA==F]
+testData &lt;- testData[, mostlyNA==F]
+
+# remove variables that don't add much value addition to the prediction, which are the first five variables
+trainData &lt;- trainData[, -(1:5)]
+testData &lt;- testData[, -(1:5)]
+
+# re-fit model using full training set (trainData)
+fitControl &lt;- trainControl(method=&quot;cv&quot;, number=3, verboseIter=F)
+fit &lt;- train(classe ~ ., data=trainData, method=&quot;rf&quot;, trControl=fitControl)</code></pre>
+</div>
+<div id="making-test-set-predictions" class="section level2">
+<h2>6. Making Test Set Predictions</h2>
+<p>Finally, we’ll use the model fit on trainData to predict the label for the observations in testData, and write those predictions to individual files:</p>
+<pre class="r"><code># predict on test set
+predictTestSet &lt;- predict(fit, newdata=testData)
+
+# convert predictions to character vector
+predictTestSet &lt;- as.character(predictTestSet)
+
+# create function to write predictions to files
+pml_write_files &lt;- function(x) {
+    n &lt;- length(x)
+    for(i in 1:n) {
+        filename &lt;- paste0(&quot;test_case_&quot;, i, &quot;.txt&quot;)
+        write.table(x[i], file=filename, quote=F, row.names=F, col.names=F)
+    }
+}
+
+# create prediction files to submit
+pml_write_files(predictTestSet)</code></pre>
+</div>
 
 
 

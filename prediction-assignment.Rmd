@@ -13,7 +13,7 @@ For this project, we are given data from accelerometers on the belt, forearm, ar
 
 Later part of the project I have shown the way I have built the model, coded for cross validation, estimating the out-of-sample error and making predictions.
 
-## 2. Prepating data 
+## 2. Prepare the data 
 
 ```{r}
 # Loading and preprocessing the data
@@ -33,12 +33,12 @@ train_Url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.c
 test_Url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 
 # Train data
-# Check if zip has already been downloaded in projectData directory?
+# Check if train data csv has already been downloaded in current location?
 if(!file.exists("train_data.csv")){
   download.file(train_Url,destfile="train_data.csv",mode = "wb")
   }
 # Test data
-# Check if zip has already been downloaded in projectData directory?
+# Check if test data csv has already been downloaded in current location?
 if(!file.exists("test_data.csv")){
   download.file(test_Url,destfile="test_data.csv",mode = "wb")
   }
@@ -134,3 +134,9 @@ pml_write_files <- function(x) {
 # create prediction files to submit
 pml_write_files(predictTestSet)
 ```
+
+## References:
+
+Weight Lifting Exercise Dataset from groupware http://groupware.les.inf.puc-rio.br/har
+
+An Introduction to Statistical Learning, G. James, D. Witten, T. Hastie, R. Tibshirani

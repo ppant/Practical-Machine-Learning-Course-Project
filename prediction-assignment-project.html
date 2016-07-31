@@ -11,7 +11,7 @@
 
 <meta name="author" content="Pradeep K. Pant, ppant@cpan.org" />
 
-<meta name="date" content="2016-07-30" />
+<meta name="date" content="2016-07-26" />
 
 <title>Course Project Prediction assignment</title>
 
@@ -118,7 +118,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Course Project Prediction assignment</h1>
 <h4 class="author"><em>Pradeep K. Pant, <a href="mailto:ppant@cpan.org">ppant@cpan.org</a></em></h4>
-<h4 class="date"><em>July 30, 2016</em></h4>
+<h4 class="date"><em>July 26, 2016</em></h4>
 
 </div>
 
@@ -128,8 +128,8 @@ $(document).ready(function () {
 <p>For this project, we are given data from accelerometers on the belt, forearm, arm, and dumbell of 6 research study participants. Our training data consists of accelerometer data and a label identifying the quality of the activity the participant was doing. Our testing data consists of accelerometer data without the identifying label. Our goal is to predict the labels for the test set observations.</p>
 <p>Later part of the project I have shown the way I have built the model, coded for cross validation, estimating the out-of-sample error and making predictions.</p>
 </div>
-<div id="prepating-data" class="section level2">
-<h2>2. Prepating data</h2>
+<div id="prepare-the-data" class="section level2">
+<h2>2. Prepare the data</h2>
 <pre class="r"><code># Loading and preprocessing the data
 # Load CRAN modules 
 library(downloader)
@@ -147,12 +147,12 @@ train_Url &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-tr
 test_Url &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
 
 # Train data
-# Check if zip has already been downloaded in projectData directory?
+# Check if train data csv has already been downloaded in current location?
 if(!file.exists(&quot;train_data.csv&quot;)){
   download.file(train_Url,destfile=&quot;train_data.csv&quot;,mode = &quot;wb&quot;)
   }
 # Test data
-# Check if zip has already been downloaded in projectData directory?
+# Check if test data csv has already been downloaded in current location?
 if(!file.exists(&quot;test_data.csv&quot;)){
   download.file(test_Url,destfile=&quot;test_data.csv&quot;,mode = &quot;wb&quot;)
   }
@@ -295,6 +295,13 @@ pml_write_files &lt;- function(x) {
 
 # create prediction files to submit
 pml_write_files(predictTestSet)</code></pre>
+</div>
+<div id="references" class="section level2">
+<h2>References:</h2>
+<ol style="list-style-type: decimal">
+<li><p>Weight Lifting Exercise Dataset from groupware <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a></p></li>
+<li><p>An Introduction to Statistical Learning, G. James, D. Witten, T. Hastie, R. Tibshirani</p></li>
+</ol>
 </div>
 
 

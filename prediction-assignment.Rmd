@@ -137,6 +137,6 @@ pml_write_files(predictTestSet)
 
 ## References:
 
-Weight Lifting Exercise Dataset from groupware http://groupware.les.inf.puc-rio.br/har
+1. Weight Lifting Exercise Dataset from groupware http://groupware.les.inf.puc-rio.br/har
 
-An Introduction to Statistical Learning, G. James, D. Witten, T. Hastie, R. Tibshirani
+2. An Introduction to Statistical Learning, G. James, D. Witten, T. Hastie, R. Tibshirani

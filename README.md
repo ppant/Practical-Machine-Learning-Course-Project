@@ -1,5 +1,5 @@
-# Practical-Machine-Learning-Course-Project
-Coursera Practical Machine learning course project for peer review
+# Practical Machine Learning Course Project
+JHU-Coursera Practical Machine learning course project for peer review
 
 gh-page is published on below link:
 
